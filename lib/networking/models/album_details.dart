@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:musicapp/extensions/collections.dart';
 import 'package:musicapp/networking/models/search_result_list.dart';
 
@@ -19,6 +20,18 @@ class AlbumDetails {
     required this.playcount,
     required this.wiki,
   });
+
+  ItemImage? get mediumImage {
+    return images.firstWhereOrNull(
+      (element) => element.type == "medium",
+    );
+  }
+
+  ItemImage? get largeImage {
+    return images.firstWhereOrNull(
+      (element) => element.type == "extralarge",
+    );
+  }
 
   factory AlbumDetails.fromJson(Map<dynamic, dynamic> json) {
     Map<dynamic, dynamic> album = json["album"];

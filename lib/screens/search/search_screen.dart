@@ -1,9 +1,13 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:musicapp/models/result.dart';
 import 'package:musicapp/networking/models/search_result_list.dart';
+import 'package:musicapp/rx/dispose_bag.dart';
 import 'package:musicapp/rx/rx_listener.dart';
+import 'package:musicapp/screens/details/details_screen.dart';
 import 'package:musicapp/screens/search/search_view_model.dart';
 import 'package:musicapp/views/items/search_result_list_item.dart';
+import 'package:musicapp/views/states/disposable_state.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({Key? key}) : super(key: key);
@@ -12,10 +16,9 @@ class SearchScreen extends StatefulWidget {
   _SearchScreenState createState() => _SearchScreenState();
 }
 
-class _SearchScreenState extends State<SearchScreen> {
+class _SearchScreenState extends DisposableState<SearchScreen> {
   late SearchViewModel _viewModel;
   late ScrollController _controller;
-  bool _isLoading = false;
   UIData? _uiData;
 
   @override
@@ -34,19 +37,19 @@ class _SearchScreenState extends State<SearchScreen> {
   void _bindViewModel() {
     _viewModel.output.data.listen((event) {
       setState(() {
-        _isLoading = false;
         _uiData = event;
       });
-    });
+    }).disposeBy(bag);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [_textField(), Expanded(child: _body())],
-        ),
+      appBar: AppBar(
+        title: Text("Music App"),
+      ),
+      body: Column(
+        children: [_textField(), Expanded(child: _body())],
       ),
     );
   }
@@ -72,7 +75,7 @@ class _SearchScreenState extends State<SearchScreen> {
         ),
       );
     } else if (_uiData?.status == ResultStatus.progres) {
-      if ((_uiData?.resultList?.results?.isEmpty ?? true)) {
+      if ((_uiData?.resultList?.results.isEmpty ?? true)) {
         return Container(
           alignment: Alignment.center,
           child: CircularProgressIndicator(),
@@ -149,7 +152,16 @@ class _SearchScreenState extends State<SearchScreen> {
       child: ListView.builder(
         controller: _controller,
         itemBuilder: (context, index) {
-          return SearchResultListItem(item: list[index]);
+          return SearchResultListItem(
+            item: list[index],
+            onTap: (SearchItem value) {
+              Navigator.of(context).push(CupertinoPageRoute(builder: (context) {
+                return AlbumDetailsScreen(
+                  searchItem: value,
+                );
+              }));
+            },
+          );
         },
         itemCount: list.length,
       ),

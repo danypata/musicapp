@@ -13,3 +13,16 @@ class RxListener {
     };
   }
 }
+
+class RxValueChanged<T> {
+  late final ValueChanged<T> onLoad;
+  final PublishSubject<T> _subject = PublishSubject();
+
+  Stream<T> get didChange => _subject;
+
+  RxValueChanged() {
+    onLoad = (value) {
+      _subject.add(value);
+    };
+  }
+}
